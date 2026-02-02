@@ -45,7 +45,7 @@ pub struct Game {
     is_game_over: bool,
     focus_handle: FocusHandle,
     spawn_count: u32,
-    new_tiles: Vec<Option<usize>>,
+    new_tiles: Vec<usize>,
 }
 
 impl Game {
@@ -153,7 +153,7 @@ impl Game {
             .items_center()
             .child(val.to_string());
 
-        if self.new_tiles.contains(&Some(idx)) {
+        if self.new_tiles.contains(&idx) {
             tile_div
                 .with_animation(
                     ("spawn", self.spawn_count),
@@ -202,7 +202,7 @@ impl Game {
             false => 4,
         };
         self.spawn_count += 1;
-        self.new_tiles.push(Some(idx));
+        self.new_tiles.push(idx);
         cx.notify();
     }
 
