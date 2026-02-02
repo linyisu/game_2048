@@ -11,6 +11,7 @@ fn get_font_color(value: u32) -> Rgba {
         rgb(0xe7e7e7)
     }
 }
+
 fn get_font_size(value: u32) -> Pixels {
     if value == 0 {
         return px(0.0);
@@ -21,6 +22,7 @@ fn get_font_size(value: u32) -> Pixels {
 
     px(size)
 }
+
 fn get_color(value: u32) -> Hsla {
     if value == 0 {
         return rgb(0xcdc1b4).into();
@@ -65,6 +67,7 @@ impl Game {
             new_tiles: Vec::new(),
         }
     }
+
     fn new_game(&mut self, _window: &mut Window, cx: &mut Context<Self>) {
         self.score = 0;
         self.is_started = true;
@@ -75,6 +78,7 @@ impl Game {
         self.spawn_tile(cx);
         cx.notify();
     }
+
     fn save_best_score(&self) {
         let mut config_path = env::current_dir().unwrap();
         config_path.push("config");
@@ -84,6 +88,7 @@ impl Game {
         fs::write(&config_path, self.best_score.to_string()).ok();
     }
 }
+
 impl Game {
     // about render
     fn render_box(&self, label: &'static str, value: u32) -> impl IntoElement {
@@ -105,6 +110,7 @@ impl Game {
                     .child(value.to_string()),
             )
     }
+
     fn render_grid(&self) -> impl IntoElement {
         div()
             .relative()
@@ -114,14 +120,19 @@ impl Game {
             .flex()
             .flex_col()
             .gap_3()
-            .child(div().flex().flex_col().p(px(6.0)).gap(px(12.0)).children(
-                (0..16).collect::<Vec<_>>().chunks(4).map(|_| {
-                    div().flex().flex_row().gap(px(12.0)).children(
-                        (0..4).map(|_| div().size(px(90.0)).bg(rgb(0xcdc1b4)).rounded_md()),
-                    )
-                }),
-            ))
+            .child(
+                div().flex().flex_col().p(px(6.0)).gap(px(12.0)).children(
+                    std::array::from_fn::<usize, 16, _>(|i| i)
+                        .chunks(4)
+                        .map(|_| {
+                            div().flex().flex_row().gap(px(12.0)).children(
+                                (0..4).map(|_| div().size(px(90.0)).bg(rgb(0xcdc1b4)).rounded_md()),
+                            )
+                        }),
+                ),
+            )
     }
+
     fn render_single_tile(&self, idx: usize, val: u32) -> impl IntoElement {
         let r = (idx / 4) as f32;
         let c = (idx % 4) as f32;
@@ -169,19 +180,20 @@ impl Game {
                 .into_any_element()
         }
     }
-    fn render_tiles(&self) -> Vec<impl IntoElement> {
+
+    fn render_tiles(&self) -> impl Iterator<Item = impl IntoElement> {
         self.datas
             .iter()
             .enumerate()
             .filter(|(_, val)| **val > 0)
             .map(|(idx, &val)| self.render_single_tile(idx, val))
-            .collect()
     }
 }
 impl Game {
     // about core logic
     fn spawn_tile(&mut self, cx: &mut Context<Self>) {
         let mut rng = rand::rng();
+
         let mut nums: Vec<usize> = (0..16).filter(|&i| self.datas[i] == 0).collect();
         nums.shuffle(&mut rng);
         let idx = nums[0];
@@ -193,9 +205,17 @@ impl Game {
         self.new_tiles.push(Some(idx));
         cx.notify();
     }
+
     fn transpose(&mut self) {
-        self.datas = (0..16).map(|i| self.datas[(i % 4) * 4 + i / 4]).collect();
+        // Without alloc
+        self.datas.swap(1, 4);
+        self.datas.swap(2, 8);
+        self.datas.swap(3, 12);
+        self.datas.swap(6, 9);
+        self.datas.swap(7, 13);
+        self.datas.swap(11, 14);
     }
+
     fn delete_zero(&mut self, pos: i32) -> bool {
         let mut flag = false;
         for i in 0..4 {
@@ -215,6 +235,7 @@ impl Game {
         }
         flag
     }
+
     fn merge(&mut self, dir: u32, pos: i32) -> bool {
         if dir == 1 {
             self.transpose();
@@ -266,6 +287,7 @@ impl Game {
         }
     }
 }
+
 impl Game {
     // about actions for keyboard and mouse
     fn move_up(&mut self, _: &Up, _window: &mut Window, cx: &mut Context<Self>) {
@@ -282,6 +304,7 @@ impl Game {
         };
         cx.notify();
     }
+
     fn move_left(&mut self, _: &Left, _window: &mut Window, cx: &mut Context<Self>) {
         if !self.is_started {
             return;
@@ -296,6 +319,7 @@ impl Game {
         };
         cx.notify();
     }
+
     fn move_down(&mut self, _: &Down, _window: &mut Window, cx: &mut Context<Self>) {
         if !self.is_started {
             return;
@@ -310,6 +334,7 @@ impl Game {
         };
         cx.notify();
     }
+
     fn move_right(&mut self, _: &Right, _window: &mut Window, cx: &mut Context<Self>) {
         if !self.is_started {
             return;
@@ -324,6 +349,7 @@ impl Game {
         };
         cx.notify();
     }
+
     fn new_game_mouse(
         &mut self,
         _: &MouseDownEvent,
@@ -332,6 +358,7 @@ impl Game {
     ) {
         self.new_game(_window, _cx);
     }
+
     fn new_game_keyboard(&mut self, _: &Enter, _window: &mut Window, _cx: &mut Context<Self>) {
         self.new_game(_window, _cx);
     }

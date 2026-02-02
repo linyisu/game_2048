@@ -28,3 +28,23 @@ fn main() {
         .unwrap();
     });
 }
+
+#[test]
+fn test_swap() {
+    for _ in 0..5 {
+        let mut data = rand::random_iter().take(16).collect::<Vec<i32>>();
+
+        let tran = (0..16)
+            .map(|i| data[(i % 4) * 4 + i / 4])
+            .collect::<Vec<_>>();
+
+        data.swap(1, 4);
+        data.swap(2, 8);
+        data.swap(3, 12);
+        data.swap(6, 9);
+        data.swap(7, 13);
+        data.swap(11, 14);
+
+        assert_eq!(data, tran);
+    }
+}
