@@ -247,9 +247,18 @@ impl Game {
         flag1 | flag2
     }
     fn check_fail(&mut self) -> bool {
+        for i in 0..16 {
+            if i % 4 == 0 {
+                println!();
+            }
+            print!("{:4} ", self.datas[i]);
+            if i == 15 {
+                println!();
+            }
+        }
         let count = self.datas.iter().filter(|&&x| x == 0).count();
         if count != 0 {
-            return false;
+            false
         } else {
             let v = self.datas.clone();
             let ops: [i32; 4] = [-4, -1, 1, 4];
@@ -258,13 +267,13 @@ impl Game {
                     for op in ops {
                         if i + op >= 0 && i + op < 16 {
                             if v[i as usize] == v[(i + op) as usize] {
-                                return true;
+                                return false;
                             }
                         }
                     }
                 }
             }
-            false
+            true
         }
     }
 }
