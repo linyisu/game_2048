@@ -281,17 +281,15 @@ impl Game {
         if count != 0 {
             false
         } else {
-            let v = self.datas.clone();
-            let ops: [i32; 4] = [-4, -1, 1, 4];
-            for i in 0..16 as i32 {
-                if v[i as usize] != 0 {
-                    for op in ops {
-                        if i + op >= 0 && i + op < 16 {
-                            if v[i as usize] == v[(i + op) as usize] {
-                                return false;
-                            }
-                        }
-                    }
+            for i in 0..16 {
+                let row = i / 4;
+                let col = i % 4;
+            
+                if col < 3 && self.datas[i] == self.datas[i + 1] {
+                    return false;
+                }
+                if row < 3 && self.datas[i] == self.datas[i + 4] {
+                    return false;
                 }
             }
             true
